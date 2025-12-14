@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from models.components.multi_head_model_config import MultiHeadModelConfig
@@ -339,6 +339,13 @@ history = model.fit(
 
 # 6. Save
 model.save('trained_model.keras')
+
+# 7. Quantize the trained model
+# After training, you can quantize the saved model:
+# python src/create_quantized_mobilenet_v3.py \
+#     --keras-model-path trained_model.keras \
+#     --output-dir ./quantized_models \
+#     --calibration-samples 200
 ```
 
 ## Handling Mismatched Datasets

@@ -17,6 +17,8 @@ This directory contains complete documentation for the Multi-Head MobileNet V3 q
 
 **New to the tool?** Start with [Getting Started](getting_started.md), then follow the [Tutorial](tutorial.md).
 
+**Want quick examples?** Check the example scripts in the `examples/` directory. Each script demonstrates a specific capability.
+
 **Need to train the model?** See the [Training Guide](training_guide.md) for programmatic usage and multi-dataset training.
 
 **Need specific information?** Check the [API Reference](api_reference.md) for parameter details.
@@ -24,3 +26,16 @@ This directory contains complete documentation for the Multi-Head MobileNet V3 q
 **Looking for ideas?** Browse the [Examples](examples.md) for different use cases.
 
 **Running into issues?** See [Troubleshooting](troubleshooting.md) for solutions.
+
+## Quick Start
+
+The main script is located at `src/create_quantized_mobilenet_v3.py`. Basic usage:
+
+```bash
+python src/create_quantized_mobilenet_v3.py --heads "5,2,3" --output-dir ./models
+```
+
+Or try the example scripts:
+```bash
+bash examples/01_basic_single_head.sh
+```

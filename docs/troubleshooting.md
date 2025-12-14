@@ -43,6 +43,26 @@ Alpha 0.25 and 0.50 don't have pretrained weights in Keras MobileNet V3.
 --heads "5,0,3"  # Wrong: second head has 0 classes
 ```
 
+### "Either --heads (for new model) or --keras-model-path (for trained model) must be provided"
+
+**Problem**: You didn't provide either `--heads` or `--keras-model-path`.
+
+**Solution**: 
+- To create a new model: Provide `--heads "5,2,3"`
+- To quantize a trained model: Provide `--keras-model-path ./model.keras`
+
+You need at least one of these arguments.
+
+### "Model file not found" or "Failed to load model"
+
+**Problem**: Cannot load a trained model file.
+
+**Solution**:
+- Verify the file path is correct and the file exists
+- Ensure the file is a valid Keras model (.keras format)
+- Try loading it manually: `tf.keras.models.load_model(path, compile=False)`
+- Check file permissions
+
 ## Quantization Issues
 
 ### Model not fully quantized
@@ -129,9 +149,10 @@ Alpha 0.25 and 0.50 don't have pretrained weights in Keras MobileNet V3.
 **Problem**: Python can't find the models module.
 
 **Solution**:
-- Run the script from the repository root directory
+- Run the script from the repository root directory: `python src/create_quantized_mobilenet_v3.py`
 - Ensure you're using the correct Python environment
 - Check that the models package exists in the expected location
+- Verify you're in the project root when running scripts
 
 ## Accuracy Issues
 
