@@ -63,11 +63,17 @@ TensorFlow version: 2.20.0
 Once the environment is set up, you can use the tool:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "128x128x1" \
     --heads "5,2,5,3,3" \
-    --output-dir ./multi_task_mobilenet_v3/output
+    --output-dir ./output
+```
+
+Or try one of the example scripts:
+
+```bash
+bash examples/01_basic_single_head.sh
 ```
 
 ## Deactivating the Virtual Environment

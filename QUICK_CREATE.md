@@ -3,20 +3,20 @@
 To create the model with heads [5, 2, 5, 3, 3]:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "128x128x1" \
     --heads "5,2,5,3,3" \
-    --output-dir ./multi_task_mobilenet_v3/output \
+    --output-dir ./output \
     --output-name "mnv3_128x128_grayscale_5_2_5_3_3"
 ```
 
 Or use the convenience script:
 ```bash
-./multi_task_mobilenet_v3/examples/create_128x128_model.sh
+bash examples/10_create_128x128_model.sh
 ```
 
-**Output file**: `./multi_task_mobilenet_v3/output/mnv3_128x128_grayscale_5_2_5_3_3_int8.tflite`
+**Output file**: `./output/mnv3_128x128_grayscale_5_2_5_3_3_int8.tflite`
 
 This will create a fully uint8 quantized model with:
 - Input: 128x128 grayscale (1 channel)
