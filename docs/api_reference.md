@@ -6,9 +6,13 @@ Complete documentation of all command-line parameters and options.
 
 ### Required Arguments
 
-#### `--heads`
+#### `--heads` OR `--keras-model-path`
 
-Comma-separated list of class counts per head.
+Either `--heads` (for new models) or `--keras-model-path` (for trained models) must be provided.
+
+##### `--heads`
+
+Comma-separated list of class counts per head. Required when creating a new model.
 
 **Format**: `"num1,num2,num3,..."`
 
@@ -18,6 +22,23 @@ Comma-separated list of class counts per head.
 - At least one head must be specified
 - Each head must have at least 1 class
 - Values must be positive integers
+- Ignored when `--keras-model-path` is provided
+
+##### `--keras-model-path`
+
+Path to a trained Keras model file (.keras) to quantize. Required when quantizing an existing trained model.
+
+**Example**: `--keras-model-path ./trained_models/best_model.keras`
+
+**Behavior**:
+- Loads the trained model from the specified path
+- Automatically detects input shape from the model
+- Skips model creation and goes straight to quantization
+- Useful for quantizing models trained on your own data
+
+**Requirements**:
+- File must be a valid Keras model (.keras format)
+- Model structure must be compatible with the quantization process
 
 #### `--output-dir`
 
@@ -186,6 +207,30 @@ Detailed quantization analysis.
 - `0`: Success
 - `1`: Error (invalid arguments, model creation failed, etc.)
 
+## Usage Modes
+
+The script supports two modes:
+
+### Mode 1: Create New Model
+
+Create a new model from scratch and quantize it:
+
+```bash
+python src/create_quantized_mobilenet_v3.py \
+    --heads "5,2,3" \
+    --output-dir ./models
+```
+
+### Mode 2: Quantize Trained Model
+
+Load an existing trained model and quantize it:
+
+```bash
+python src/create_quantized_mobilenet_v3.py \
+    --keras-model-path ./trained_model.keras \
+    --output-dir ./models
+```
+
 ## Examples
 
-See [Examples](examples.md) for complete usage examples with different configurations.
+See [Examples](examples.md) for complete usage examples with different configurations. Also check the `examples/` directory for ready-to-run example scripts.
