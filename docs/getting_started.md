@@ -24,9 +24,15 @@ pip install tensorflow numpy
 The simplest command creates a model with a single classification head:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "2" \
     --output-dir ./my_models
+```
+
+Or use one of the example scripts:
+
+```bash
+bash examples/01_basic_single_head.sh
 ```
 
 This creates a model with 2 output classes (like person/no-person detection). The output includes:
@@ -46,6 +52,23 @@ After running the script, you'll find several files in your output directory:
 - `{model_name}_quantization_info.json` - Quantization analysis details
 
 The model name is auto-generated from your configuration. For example, a model with alpha 0.25, heads [5,2], and input shape 224x224x3 would be named `mnv3_0_25_5_2_224x224x3`.
+
+## Example Scripts
+
+Ready-to-use example scripts are available in the `examples/` directory. Run them to quickly create different model types:
+
+```bash
+# Basic single-head model
+bash examples/01_basic_single_head.sh
+
+# Multi-head model
+bash examples/02_multi_head_named.sh
+
+# See all examples
+ls examples/*.sh
+```
+
+Check `examples/README.md` for descriptions of each example script.
 
 ## Next Steps
 

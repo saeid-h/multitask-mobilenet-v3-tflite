@@ -7,7 +7,7 @@ Real-world examples of creating quantized MobileNet V3 models for different use 
 Simple binary classification - detect if a person is present in an image.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "224x224x3" \
     --heads "2" \
@@ -21,7 +21,7 @@ This creates a small, fast model suitable for edge devices. The output has 2 cla
 Multi-task learning: detect person and classify gender simultaneously.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "224x224x3" \
     --heads "2,2" \
@@ -40,7 +40,7 @@ Both predictions share the same backbone features, making this more efficient th
 Three-head model for comprehensive scene understanding.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.5 \
     --input-shape "224x224x3" \
     --heads "10,2,5" \
@@ -60,7 +60,7 @@ Use alpha 0.5 for better accuracy when handling multiple tasks.
 For applications using grayscale input (like some security cameras or medical imaging).
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "96x96x1" \
     --heads "2" \
@@ -74,7 +74,7 @@ Smaller input size (96x96) with grayscale reduces model size further. Good for c
 When you need better accuracy and can use a larger model.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.75 \
     --input-shape "224x224x3" \
     --heads "100,20" \
@@ -95,7 +95,7 @@ Only works with alpha 0.75 or 1.0, and requires RGB input.
 For tasks needing more detail, use larger input resolution.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.5 \
     --input-shape "320x320x3" \
     --heads "50,10" \
@@ -112,7 +112,7 @@ Larger inputs improve detail recognition but increase:
 If quantization quality is critical, use more calibration samples.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --heads "5,2,3" \
     --calibration-samples 300 \
@@ -131,7 +131,7 @@ Trade-off: Takes longer to generate the model.
 Skip saving the Keras model to save disk space.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "2" \
     --no-save-keras \
     --output-dir ./models/deployment_only
@@ -144,7 +144,7 @@ Useful when you only need the TFLite file for deployment and don't need the Kera
 Specify your own output filename prefix.
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --heads "10,5" \
     --output-name "my_custom_model" \
@@ -159,16 +159,55 @@ Generate several variants to compare:
 
 ```bash
 # Small model
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 --heads "2" --output-dir ./models/variants/small
 
 # Medium model
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.5 --heads "2" --output-dir ./models/variants/medium
 
 # Large model
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 1.0 --heads "2" --output-dir ./models/variants/large
 ```
 
 Compare model sizes, inference speed, and accuracy to choose the best fit for your application.
+
+## Example 11: Quantizing a Trained Model
+
+If you've already trained a model using the training guide, you can quantize it:
+
+```bash
+python src/create_quantized_mobilenet_v3.py \
+    --keras-model-path ./trained_models/best_model.keras \
+    --output-dir ./deployment_models \
+    --calibration-samples 200
+```
+
+This is useful when you:
+- Have trained a model on your specific dataset
+- Want to deploy the trained model to edge devices
+- Need to maintain training accuracy through quantization
+
+The script will automatically detect the model's input shape and structure.
+
+## Using Example Scripts
+
+Ready-to-use example scripts are available in the `examples/` directory. Each script demonstrates a specific use case:
+
+- `01_basic_single_head.sh` - Basic binary classification
+- `02_multi_head_named.sh` - Multi-task learning
+- `03_grayscale_model.sh` - Grayscale for constrained devices
+- `04_different_sizes.sh` - Size comparison
+- `05_high_resolution.sh` - High-resolution models
+- `06_pretrained_weights.sh` - Transfer learning
+- `07_custom_calibration.sh` - High-quality quantization
+- `08_quantize_trained_model.sh` - Quantize existing models
+- `09_comprehensive_demo.sh` - Runs multiple examples
+
+Run any script with:
+```bash
+bash examples/01_basic_single_head.sh
+```
+
+See `examples/README.md` for detailed descriptions.

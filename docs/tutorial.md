@@ -7,7 +7,7 @@ This tutorial walks you through creating quantized MobileNet V3 models with diff
 Start with a simple model that has one classification head:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "2" \
     --output-dir ./tutorial_output
 ```
@@ -24,7 +24,7 @@ The model will be saved as a TFLite file ready for deployment.
 Now create a model with multiple heads. This is useful when you need to predict multiple things from the same image:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "5,2,3" \
     --head-names "object_class,person_detection,age_group" \
     --output-dir ./tutorial_output
@@ -42,7 +42,7 @@ All heads share the same MobileNet V3 backbone, making the model efficient.
 You can change the input resolution and channels. For grayscale images:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --input-shape "96x96x1" \
     --heads "2" \
     --output-dir ./tutorial_output
@@ -51,7 +51,7 @@ python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
 For smaller RGB images:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --input-shape "128x128x3" \
     --heads "5,2" \
     --output-dir ./tutorial_output
@@ -64,7 +64,7 @@ Smaller input sizes create smaller models and faster inference, but may reduce a
 If you want to use ImageNet pretrained weights (only available for alpha 0.75 or 1.0):
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.75 \
     --heads "100,10" \
     --use-pretrained \
@@ -84,13 +84,13 @@ Choose the alpha parameter based on your needs:
 
 ```bash
 # Small model
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --heads "2" \
     --output-dir ./tutorial_output/small
 
 # Larger model
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.5 \
     --heads "2" \
     --output-dir ./tutorial_output/large
@@ -101,7 +101,7 @@ python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
 The quantization process uses a representative dataset for calibration. You can control how many samples are used:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "5,2" \
     --calibration-samples 200 \
     --output-dir ./tutorial_output
@@ -114,7 +114,7 @@ More samples can improve quantization quality but take longer. The default of 10
 By default, the script saves the Keras model (.keras file) as well as the quantized TFLite model. To skip the Keras model:
 
 ```bash
-python multi_task_mobilenet_v3/examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "2" \
     --no-save-keras \
     --output-dir ./tutorial_output
@@ -131,8 +131,21 @@ After creation, check the summary file to verify:
 
 Open the `*_summary.txt` file to see all model details. The `*_report.json` file contains machine-readable statistics.
 
+## Step 8: Quantizing a Trained Model
+
+If you've already trained a model and want to quantize it:
+
+```bash
+python src/create_quantized_mobilenet_v3.py \
+    --keras-model-path ./my_trained_model.keras \
+    --output-dir ./quantized_models
+```
+
+This loads your trained model and quantizes it to TFLite. The `--heads` argument is not needed when loading a trained model, as the model structure is already defined.
+
 ## Next Steps
 
 - See [Examples](examples.md) for real-world use cases
 - Read [Architecture](architecture.md) to understand how it works
 - Check [Quantization Guide](quantization_guide.md) for quantization details
+- Try the example scripts in `examples/` directory for quick demos
