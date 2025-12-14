@@ -30,9 +30,9 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "  ✓ Basic model created"
+    echo "  Basic model created"
 else
-    echo "  ✗ Failed"
+    echo "  Failed"
 fi
 
 # Example 2: Multi-head
@@ -47,9 +47,9 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "  ✓ Multi-head model created"
+    echo "  Multi-head model created"
 else
-    echo "  ✗ Failed"
+    echo "  Failed"
 fi
 
 # Example 3: Grayscale
@@ -63,9 +63,9 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "  ✓ Grayscale model created"
+    echo "  Grayscale model created"
 else
-    echo "  ✗ Failed"
+    echo "  Failed"
 fi
 
 # Example 4: Different alpha
@@ -79,9 +79,9 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "  ✓ Medium model created"
+    echo "  Medium model created"
 else
-    echo "  ✗ Failed"
+    echo "  Failed"
 fi
 
 # Example 5: Custom calibration
@@ -96,9 +96,9 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-    echo "  ✓ High-quality model created"
+    echo "  High-quality model created"
 else
-    echo "  ✗ Failed"
+    echo "  Failed"
 fi
 
 echo ""

@@ -17,7 +17,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --output-name "multitask_model"
 
 echo ""
-echo "✓ Model created successfully!"
+echo "Model created successfully!"
 echo "  Output: ../output/examples/multi_head_named/multitask_model_int8.tflite"
 echo ""
 echo "This model performs 3 tasks simultaneously:"

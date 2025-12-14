@@ -11,7 +11,7 @@ echo ""
 TRAINED_MODEL="../output/examples/basic_single_head/person_detection_binary.keras"
 
 if [ ! -f "$TRAINED_MODEL" ]; then
-    echo "ℹ️  Trained model not found at: $TRAINED_MODEL"
+    echo "Trained model not found at: $TRAINED_MODEL"
     echo ""
     echo "First, train a model using example_training.py:"
     echo "  python examples/example_training.py"
@@ -35,7 +35,7 @@ python ../src/create_quantized_mobilenet_v3.py \
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✓ Trained model quantized successfully!"
+    echo "Trained model quantized successfully!"
     echo "  Output: ../output/examples/quantized_trained/quantized_from_trained_int8.tflite"
     echo ""
     echo "Workflow:"
@@ -50,7 +50,7 @@ if [ $? -eq 0 ]; then
     echo ""
 else
     echo ""
-    echo "✗ Failed to quantize trained model"
+    echo "Failed to quantize trained model"
     echo "  Check that the model file exists and is a valid Keras model"
     exit 1
 fi

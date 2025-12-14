@@ -27,9 +27,9 @@ for i in "${!ALPHAS[@]}"; do
         --no-save-keras
     
     if [ $? -eq 0 ]; then
-        echo "  ✓ Alpha $ALPHA model created"
+        echo "  Alpha $ALPHA model created"
     else
-        echo "  ✗ Failed to create alpha $ALPHA model"
+        echo "  Failed to create alpha $ALPHA model"
     fi
 done
 

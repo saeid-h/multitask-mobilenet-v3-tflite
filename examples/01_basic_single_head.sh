@@ -16,7 +16,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --output-name "person_detection_binary"
 
 echo ""
-echo "✓ Model created successfully!"
+echo "Model created successfully!"
 echo "  Output: ../output/examples/basic_single_head/person_detection_binary_int8.tflite"
 echo ""
 echo "Use case: Binary classification tasks like:"

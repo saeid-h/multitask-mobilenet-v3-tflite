@@ -19,7 +19,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --calibration-samples 150
 
 echo ""
-echo "✓ Pretrained model created successfully!"
+echo "Pretrained model created successfully!"
 echo "  Output: ../output/examples/pretrained/pretrained_model_int8.tflite"
 echo ""
 echo "Pretrained weights provide:"

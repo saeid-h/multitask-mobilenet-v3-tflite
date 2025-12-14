@@ -18,7 +18,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --output-name "high_quality_quantized"
 
 echo ""
-echo "✓ High-quality quantized model created successfully!"
+echo "High-quality quantized model created successfully!"
 echo "  Output: ../output/examples/custom_calibration/high_quality_quantized_int8.tflite"
 echo ""
 echo "Custom calibration (300 samples) provides:"

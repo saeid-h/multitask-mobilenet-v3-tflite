@@ -17,7 +17,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --no-save-keras
 
 echo ""
-echo "✓ Model created successfully!"
+echo "Model created successfully!"
 echo "  Output: ../output/examples/grayscale/grayscale_person_detection_int8.tflite"
 echo ""
 echo "Benefits of grayscale models:"

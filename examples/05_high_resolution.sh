@@ -18,7 +18,7 @@ python ../src/create_quantized_mobilenet_v3.py \
     --calibration-samples 200
 
 echo ""
-echo "✓ High-resolution model created successfully!"
+echo "High-resolution model created successfully!"
 echo "  Output: ../output/examples/high_resolution/high_res_multitask_int8.tflite"
 echo ""
 echo "High-resolution models are useful for:"
