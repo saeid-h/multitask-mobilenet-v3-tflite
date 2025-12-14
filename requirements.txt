@@ -1,0 +1,6 @@
+# Minimal requirements for Multi-Head MobileNet V3 quantization tool
+# For Python 3.13+, TensorFlow 2.20+ will be installed
+# For Python 3.7-3.12, TensorFlow 2.15+ is available
+
+tensorflow>=2.15.0
+numpy>=1.22.0
