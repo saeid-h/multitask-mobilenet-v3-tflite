@@ -66,11 +66,24 @@ Runs multiple examples to showcase project capabilities.
 - **Shows**: Full range of capabilities
 - **Purpose**: Quick overview of all features
 
+### create_experiment_models.sh
+Creates all experimental models with standardized naming format.
+- **Format**: `{resolution}_{channels}_{num_heads}` (e.g., `96_3_5` = 96x96 resolution, 3 channels, 5 heads)
+- **Creates**: 8 model variants covering different resolutions, channels, and head counts
+- **Output**: Models saved to `output/mnv3_experiments/` and copied to `output/mnv3_exp/`
+- **Use case**: Generate multiple model variants for experimentation and comparison
+
 ## Running Examples
 
 ### Individual Examples
 
-Run any script directly:
+Run any script directly from the project root:
+
+```bash
+bash examples/01_basic_single_head.sh
+```
+
+Or from the examples directory:
 
 ```bash
 cd examples
@@ -100,6 +113,10 @@ All example outputs are saved to:
 ```
 ../output/examples/<example_name>/
 ```
+
+The experimental models script (`create_experiment_models.sh`) saves to:
+- `output/mnv3_experiments/<model_name>/` - Full model outputs with reports
+- `output/mnv3_exp/` - Copied TFLite models with simplified names
 
 Each output directory contains:
 - `*_int8.tflite` - Quantized TensorFlow Lite model
@@ -133,6 +150,13 @@ python examples/example_training.py
 bash examples/08_quantize_trained_model.sh
 ```
 
+### Generate All Experimental Models
+```bash
+bash examples/create_experiment_models.sh
+```
+
+This creates 8 model variants with standardized naming format for experimentation.
+
 ## Next Steps
 
 1. **Explore Examples**: Run different scripts to see capabilities
@@ -146,4 +170,5 @@ bash examples/08_quantize_trained_model.sh
 - Scripts create output directories automatically
 - Use `--no-save-keras` to skip saving intermediate Keras files (saves disk space)
 - Models are Vela-compatible by default for Arm Ethos-U NPU deployment
+- The `create_experiment_models.sh` script creates models with standardized naming format for experimentation
 

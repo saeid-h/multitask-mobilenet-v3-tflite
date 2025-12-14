@@ -204,6 +204,7 @@ Ready-to-use example scripts are available in the `examples/` directory. Each sc
 - `07_custom_calibration.sh` - High-quality quantization
 - `08_quantize_trained_model.sh` - Quantize existing models
 - `09_comprehensive_demo.sh` - Runs multiple examples
+- `create_experiment_models.sh` - Creates all experimental model variants with standardized naming
 
 Run any script with:
 ```bash
