@@ -66,7 +66,7 @@ for script in $EXAMPLE_SCRIPTS; do
     if [[ "$script_name" == "08_quantize_trained_model.sh" ]]; then
         TRAINED_MODEL="output/examples/basic_single_head/person_detection_binary.keras"
         if [ ! -f "$TRAINED_MODEL" ]; then
-            echo "  ⏭️  SKIPPED: No trained model found (this is expected)"
+            echo "  SKIPPED: No trained model found (this is expected)"
             echo "      To test this, first run: bash examples/01_basic_single_head.sh"
             ((SKIPPED++))
             SKIPPED_SCRIPTS+=("$script_name")
@@ -80,18 +80,18 @@ for script in $EXAMPLE_SCRIPTS; do
     if bash "$script" > "$OUTPUT_DIR/${script_name}.log" 2>&1; then
         end_time=$(date +%s)
         duration=$((end_time - start_time))
-        echo "  ✅ PASSED (${duration}s)"
+        echo "  PASSED (${duration}s)"
         ((PASSED++))
         PASSED_SCRIPTS+=("$script_name")
         
         # Check if output files were created
         if grep -q "int8.tflite" "$OUTPUT_DIR/${script_name}.log"; then
-            echo "    ✓ TFLite model created"
+            echo "    TFLite model created"
         fi
     else
         end_time=$(date +%s)
         duration=$((end_time - start_time))
-        echo "  ❌ FAILED (${duration}s)"
+        echo "  FAILED (${duration}s)"
         echo "    Check log: $OUTPUT_DIR/${script_name}.log"
         ((FAILED++))
         FAILED_SCRIPTS+=("$script_name")
@@ -108,15 +108,15 @@ echo "========================================="
 echo "Test Summary"
 echo "========================================="
 echo "Total scripts: $((PASSED + FAILED + SKIPPED))"
-echo "✅ Passed: $PASSED"
-echo "❌ Failed: $FAILED"
-echo "⏭️  Skipped: $SKIPPED"
+echo "Passed: $PASSED"
+echo "Failed: $FAILED"
+echo "Skipped: $SKIPPED"
 echo ""
 
 if [ ${#PASSED_SCRIPTS[@]} -gt 0 ]; then
     echo "Passed scripts:"
     for s in "${PASSED_SCRIPTS[@]}"; do
-        echo "  ✅ $s"
+        echo "  $s"
     done
     echo ""
 fi
@@ -124,7 +124,7 @@ fi
 if [ ${#FAILED_SCRIPTS[@]} -gt 0 ]; then
     echo "Failed scripts:"
     for s in "${FAILED_SCRIPTS[@]}"; do
-        echo "  ❌ $s"
+        echo "  $s"
     done
     echo ""
 fi
@@ -132,7 +132,7 @@ fi
 if [ ${#SKIPPED_SCRIPTS[@]} -gt 0 ]; then
     echo "Skipped scripts:"
     for s in "${SKIPPED_SCRIPTS[@]}"; do
-        echo "  ⏭️  $s"
+        echo "  $s"
     done
     echo ""
 fi
@@ -161,15 +161,15 @@ echo ""
 echo "Generated models:"
 find output/examples -name "*.tflite" 2>/dev/null | while read -r model; do
     size=$(du -h "$model" | cut -f1)
-    echo "  📦 $model ($size)"
+    echo "  $model ($size)"
 done
 
 echo ""
 if [ $FAILED -eq 0 ]; then
-    echo "🎉 All tests passed!"
+    echo "All tests passed!"
     exit 0
 else
-    echo "⚠️  Some tests failed. Check logs in $OUTPUT_DIR/"
+    echo "WARNING: Some tests failed. Check logs in $OUTPUT_DIR/"
     exit 1
 fi
 
