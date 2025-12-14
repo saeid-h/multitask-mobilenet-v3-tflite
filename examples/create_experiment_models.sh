@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to create all experimental models
 
-BASE_DIR="output-mnv3"
-PROJECT_ROOT="/Volumes/SSD/projects/multi_task_models"
+BASE_DIR="../outputs/experiment_models"
+PROJECT_ROOT="../"
 
 cd "$PROJECT_ROOT" || exit 1
 

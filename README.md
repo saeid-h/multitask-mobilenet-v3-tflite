@@ -11,7 +11,7 @@ pip install tensorflow numpy
 
 Create a model with multiple heads:
 ```bash
-python examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --heads "5,2,3" \
     --output-dir ./models
 ```
@@ -44,7 +44,7 @@ Full documentation is available in the [docs/](docs/) directory:
 ## Basic Usage
 
 ```bash
-python examples/create_quantized_mobilenet_v3.py \
+python src/create_quantized_mobilenet_v3.py \
     --alpha 0.25 \
     --input-shape "224x224x3" \
     --heads "2,5" \
