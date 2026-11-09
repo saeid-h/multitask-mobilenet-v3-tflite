@@ -282,30 +282,24 @@ class MultiHeadMobileNetArchitecture(MobileNetArchitecture):
         pass
     
     def build_head(self, head_config: HeadConfiguration, backbone_output: tf.Tensor) -> tf.Tensor:
-        """Build a single classification head.
+        """Build a head using the registered head builder for the specified type.
         
-        This method creates a classification head for the given configuration.
-        The head takes the backbone output and produces classification predictions.
+        This method dispatches to the appropriate head builder based on the
+        head_config.head_type field. Supports extensible head architectures
+        for different task types (classification, regression, embedding, etc.).
         
         Args:
             head_config: Configuration for the head
             backbone_output: Output tensor from the backbone
             
         Returns:
-            Classification output tensor
+            Head output tensor
+            
+        Raises:
+            ValueError: If head_config.head_type is not registered
         """
-        # Standard head architecture: GlobalAvgPool + Dropout + Dense
-        x = layers.GlobalAveragePooling2D(name=f"{head_config.name}_global_pool")(backbone_output)
-        x = layers.Dropout(head_config.dropout_rate, name=f"{head_config.name}_dropout")(x)
-        
-        # Output layer with specified activation
-        output = layers.Dense(
-            head_config.num_classes,
-            activation=head_config.activation,
-            name=f"{head_config.name}_output"
-        )(x)
-        
-        return output
+        from ..components.head_builders import build_head_for_type
+        return build_head_for_type(head_config.head_type, head_config, backbone_output)
     
     def build_model(self) -> tf.keras.Model:
         """Build and return the complete multi-head TensorFlow model.

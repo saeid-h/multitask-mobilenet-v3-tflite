@@ -30,7 +30,8 @@ from src.utils import (
     validate_model_outputs,
     save_model_report,
     save_model_report_for_loaded_model,
-    generate_output_name
+    generate_output_name,
+    export_separate_tflite_models
 )
 
 
@@ -178,7 +179,34 @@ def _quantize_and_report(
             saved_files = architecture.save_all_weights_separately(str(weights_dir))
             print(f"  Saved {len(saved_files)} weight files")
     
-    # Quantize to TFLite
+    # Export separate TFLite models if requested
+    if args.export_separate_tflite and architecture is not None:
+        if not architecture.is_separable:
+            print("Warning: --export-separate-tflite requires --separable-weights. Skipping.")
+        else:
+            separate_dir = output_dir / f"{output_name}_separate_tflite"
+            print(f"Exporting separate TFLite models to {separate_dir}...")
+            print(f"  Backbone format: {args.backbone_format}")
+            print(f"  Head format: {args.head_format}")
+            
+            separate_results = export_separate_tflite_models(
+                architecture,
+                input_shape,
+                str(separate_dir),
+                output_name,
+                backbone_format=args.backbone_format,
+                head_format=args.head_format,
+                calibration_samples=args.calibration_samples
+            )
+            
+            # Report separate export results
+            bb_info = separate_results['backbone']
+            print(f"  Backbone ({bb_info['format']}): {bb_info['size_kb']:.1f} KB")
+            for head_name, head_info in separate_results['heads'].items():
+                print(f"  Head '{head_name}' ({head_info['format']}): {head_info['size_kb']:.1f} KB")
+            print(f"  Total files: {len(separate_results['files'])}")
+    
+    # Quantize to TFLite (unified model)
     print("Quantizing to TFLite (uint8)...")
     tflite_path = output_dir / f"{output_name}_int8.tflite"
     tflite_model, quantization_info = quantize_to_tflite(
@@ -369,6 +397,33 @@ def main():
         default=False,
         help='Save backbone and head weights to separate files (requires --separable-weights). '
              'Creates backbone_weights.h5 and <head_name>_weights.h5 files. (default: False)'
+    )
+    
+    # Export separate TFLite models option
+    parser.add_argument(
+        '--export-separate-tflite',
+        action='store_true',
+        default=False,
+        help='Export backbone and heads as separate TFLite files (requires --separable-weights). '
+             'Allows different precision formats for backbone and heads. (default: False)'
+    )
+    
+    # Backbone precision format
+    parser.add_argument(
+        '--backbone-format',
+        type=str,
+        choices=['int8', 'fp16', 'fp32'],
+        default='int8',
+        help='Precision format for backbone TFLite export (default: int8)'
+    )
+    
+    # Head precision format
+    parser.add_argument(
+        '--head-format',
+        type=str,
+        choices=['int8', 'fp16', 'fp32'],
+        default='fp16',
+        help='Precision format for head TFLite exports (default: fp16)'
     )
     
     args = parser.parse_args()

@@ -60,6 +60,29 @@ python src/create_quantized_mobilenet_v3.py \
 # ./models/xxx_weights/age_group_weights.h5
 ```
 
+### Separate TFLite Export
+
+Export backbone and heads as separate TFLite files with different precision formats:
+
+```bash
+# Export with mixed precision (int8 backbone, fp16 heads)
+python src/create_quantized_mobilenet_v3.py \
+    --heads "5,2,3" \
+    --head-names "object_class,person_detection,age_group" \
+    --separable-weights \
+    --export-separate-tflite \
+    --backbone-format int8 \
+    --head-format fp16 \
+    --output-dir ./models
+
+# Output files:
+# ./models/xxx_int8.tflite (unified model)
+# ./models/xxx_separate_tflite/xxx_backbone_int8.tflite
+# ./models/xxx_separate_tflite/xxx_object_class_fp16.tflite
+# ./models/xxx_separate_tflite/xxx_person_detection_fp16.tflite
+# ./models/xxx_separate_tflite/xxx_age_group_fp16.tflite
+```
+
 ## Saving and Loading Weights
 
 ### Save All Weights Separately
@@ -307,6 +330,76 @@ print(f"Cached time: {results['speedup']['total_cached_time']*1000:.2f} ms")
 print(f"Speedup: {results['speedup']['speedup_factor']:.2f}x")
 ```
 
+## Separate TFLite Inference
+
+When using `--export-separate-tflite`, inference requires two steps: backbone → heads.
+
+### Python API for Separate Export
+
+```python
+from src.utils import export_separate_tflite_models
+
+# Export separate models
+results = export_separate_tflite_models(
+    architecture,
+    input_shape=(224, 224, 3),
+    output_dir="./separate_models",
+    base_name="my_model",
+    backbone_format="int8",
+    head_format="fp16",
+    calibration_samples=100
+)
+
+print(f"Backbone: {results['backbone']['file']}")
+for head_name, head_info in results['heads'].items():
+    print(f"Head '{head_name}': {head_info['file']}")
+```
+
+### Two-Step Inference
+
+```python
+import tensorflow as tf
+import numpy as np
+
+# Load interpreters
+backbone = tf.lite.Interpreter("my_model_backbone_int8.tflite")
+backbone.allocate_tensors()
+
+head = tf.lite.Interpreter("my_model_object_class_fp16.tflite")
+head.allocate_tensors()
+
+# Get tensor details
+bb_input = backbone.get_input_details()[0]
+bb_output = backbone.get_output_details()[0]
+head_input = head.get_input_details()[0]
+head_output = head.get_output_details()[0]
+
+# Step 1: Run backbone (uint8 input/output)
+image_uint8 = preprocess_image_to_uint8(image)  # Your preprocessing
+backbone.set_tensor(bb_input['index'], image_uint8)
+backbone.invoke()
+features_quantized = backbone.get_tensor(bb_output['index'])
+
+# Step 2: Dequantize backbone output for fp16 head
+scale, zero_point = bb_output['quantization_parameters']['scales'][0], bb_output['quantization_parameters']['zero_points'][0]
+features_float = (features_quantized.astype(np.float32) - zero_point) * scale
+
+# Step 3: Run head (fp32 input/output)
+head.set_tensor(head_input['index'], features_float)
+head.invoke()
+logits = head.get_tensor(head_output['index'])
+
+# Step 4: Apply softmax for probabilities
+probabilities = tf.nn.softmax(logits).numpy()
+```
+
+### Deployment Benefits
+
+- **NPU + CPU**: Run int8 backbone on NPU, fp16 heads on CPU
+- **Better accuracy**: Avoid quantization loss in classification layers
+- **Modular loading**: Load only needed heads for specific tasks
+- **Memory efficiency**: Keep only active heads in memory
+
 ## Demo Applications
 
 ### Jupyter Notebook Demo
@@ -378,6 +471,15 @@ Then open the displayed URL in your browser. The UI provides:
 | `cache_manager.predict_all_loaded_heads()` | Run all loaded heads |
 | `cache_manager.get_memory_usage()` | Get memory info |
 | `cache_manager.compare_performance(...)` | Compare performance |
+
+### Separate TFLite Export Methods
+
+| Function | Description |
+|----------|-------------|
+| `export_separate_tflite_models(...)` | Export backbone and heads as separate TFLite files |
+| `convert_to_int8_tflite(model, input_shape, ...)` | Convert Keras model to int8 TFLite |
+| `convert_to_fp16_tflite(model, ...)` | Convert Keras model to fp16 TFLite |
+| `convert_to_fp32_tflite(model, ...)` | Convert Keras model to fp32 TFLite |
 
 ## Best Practices
 

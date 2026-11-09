@@ -22,6 +22,8 @@ Comma-separated list of class counts per head. Required when creating a new mode
 - At least one head must be specified
 - Each head must have at least 1 class
 - Values must be positive integers
+
+**Note**: The CLI creates standard classification heads. For other head types (multilabel, regression, embedding, ordinal), use the Python API. See [Head Types Reference](head_types_reference.md) for details.
 - Ignored when `--keras-model-path` is provided
 
 ##### `--keras-model-path`
@@ -205,6 +207,41 @@ Save backbone and head weights to separate files. Requires `--separable-weights`
 - `{output_name}_weights/{head_name}_weights.h5` (one per head)
 
 **Example**: `--separable-weights --save-separate-weights`
+
+### `--export-separate-tflite`
+
+Export backbone and heads as separate TFLite files with independent precision formats.
+
+**Requirements**: Must be used with `--separable-weights`
+
+**Purpose**: Enables mixed-precision deployment where backbone and heads can use different formats (int8, fp16, fp32)
+
+**Output files**:
+- `{output_name}_separate_tflite/{output_name}_backbone_{backbone_format}.tflite`
+- `{output_name}_separate_tflite/{output_name}_{head_name}_{head_format}.tflite` (one per head)
+
+### `--backbone-format {int8,fp16,fp32}`
+
+Precision format for backbone TFLite export when using `--export-separate-tflite`.
+
+**Default**: `int8`
+
+**Options**:
+- `int8`: Full quantization with calibration (smallest size, NPU compatible)
+- `fp16`: Half precision floating point (balanced size/accuracy)
+- `fp32`: Full precision (largest size, best accuracy)
+
+### `--head-format {int8,fp16,fp32}`
+
+Precision format for head TFLite exports when using `--export-separate-tflite`.
+
+**Default**: `fp16`
+
+**Use cases**:
+- `fp16`/`fp32`: Better accuracy by avoiding quantization of final classification layers
+- `int8`: Smallest size for resource-constrained deployment
+
+**Example**: `--export-separate-tflite --backbone-format int8 --head-format fp16`
 
 ## Output Files
 

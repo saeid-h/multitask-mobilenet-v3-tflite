@@ -40,6 +40,8 @@ Full documentation is available in the [docs/](docs/) directory:
 - [API Reference](docs/api_reference.md) - Complete parameter documentation
 - [Examples](docs/examples.md) - Various use cases and configurations
 - [Architecture](docs/architecture.md) - How multi-head MobileNet V3 works
+- [Head Types Reference](docs/head_types_reference.md) - Classification, regression, embedding, and more
+- [Task-Head Reference](docs/task_head_reference.md) - Complete CV task mapping & implementation roadmap
 - [Quantization Guide](docs/quantization_guide.md) - Understanding quantization
 - [Pretrained Weights Reference](docs/pretrained_weights_reference.md) - Which configs support pretrained weights
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions

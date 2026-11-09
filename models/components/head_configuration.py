@@ -57,7 +57,9 @@ class HeadConfiguration:
         if self.loss_weight < 0.0:
             raise ValueError(f"loss_weight must be non-negative, got {self.loss_weight}")
         
-        valid_head_types = {'standard', 'custom'}
+        valid_head_types = {'standard', 'custom', 'multilabel', 'regression', 'embedding', 'ordinal', 
+                           'ssd_detection', 'yolo_detection', 'segmentation', 'keypoint_detection',
+                           'text_detection', 'text_recognition', 'scene_text'}
         if self.head_type not in valid_head_types:
             raise ValueError(f"head_type must be one of {valid_head_types}, got {self.head_type}")
     
@@ -226,7 +228,8 @@ class MultiHeadConfiguration:
 
 
 def create_head_config_from_list(head_config_list: List[int], 
-                                head_names: Optional[List[str]] = None) -> List[HeadConfiguration]:
+                                head_names: Optional[List[str]] = None,
+                                head_type: str = "standard") -> List[HeadConfiguration]:
     """Create head configurations from a list of class counts.
     
     This utility function creates HeadConfiguration objects from a simple list
@@ -235,6 +238,7 @@ def create_head_config_from_list(head_config_list: List[int],
     Args:
         head_config_list: List of class counts (e.g., [2, 2, 5])
         head_names: Optional list of head names. If None, auto-generates names
+        head_type: Head type for all heads (default: "standard")
         
     Returns:
         List of HeadConfiguration objects
@@ -257,8 +261,393 @@ def create_head_config_from_list(head_config_list: List[int],
         
         head_config = HeadConfiguration(
             name=name,
-            num_classes=num_classes
+            num_classes=num_classes,
+            head_type=head_type
         )
         heads.append(head_config)
     
     return heads
+
+
+def create_classification_head(name: str, num_classes: int, activation: str = "linear", 
+                             dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create a standard classification head configuration.
+    
+    Args:
+        name: Head name
+        num_classes: Number of output classes
+        activation: Output activation ('linear', 'softmax')
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for classification
+    """
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_classes,
+        activation=activation,
+        dropout_rate=dropout_rate,
+        head_type="standard"
+    )
+
+
+def create_multilabel_head(name: str, num_labels: int, dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create a multi-label classification head configuration.
+    
+    Args:
+        name: Head name
+        num_labels: Number of binary labels
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for multi-label classification
+    """
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_labels,
+        activation="sigmoid",  # Will be overridden by builder
+        dropout_rate=dropout_rate,
+        head_type="multilabel"
+    )
+
+
+def create_regression_head(name: str, n_outputs: int = 1, 
+                         output_activation: Optional[str] = None,
+                         output_scale: float = 1.0, 
+                         output_bias: float = 0.0,
+                         dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create a regression head configuration.
+    
+    Args:
+        name: Head name
+        n_outputs: Number of regression outputs
+        output_activation: Output activation ('sigmoid', 'tanh', None)
+        output_scale: Scale factor for outputs
+        output_bias: Bias added to outputs
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for regression
+    """
+    custom_params = {
+        "n_outputs": n_outputs,
+        "output_scale": output_scale,
+        "output_bias": output_bias
+    }
+    if output_activation:
+        custom_params["output_activation"] = output_activation
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=n_outputs,  # Used as default if n_outputs not in custom_params
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="regression",
+        custom_params=custom_params
+    )
+
+
+def create_embedding_head(name: str, embed_dim: int = 128,
+                        projection_layers: Optional[List[int]] = None,
+                        use_bn: bool = False,
+                        dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create an embedding head configuration.
+    
+    Args:
+        name: Head name
+        embed_dim: Embedding dimension
+        projection_layers: Hidden layer sizes for MLP projection
+        use_bn: Use batch normalization before L2 normalization
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for embedding
+    """
+    custom_params = {
+        "embed_dim": embed_dim,
+        "use_bn": use_bn
+    }
+    if projection_layers:
+        custom_params["projection_layers"] = projection_layers
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=embed_dim,  # Placeholder
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="embedding",
+        custom_params=custom_params
+    )
+
+
+def create_ordinal_head(name: str, num_classes: int,
+                      threshold_init: str = "ascending",
+                      dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create an ordinal regression head configuration.
+    
+    Args:
+        name: Head name
+        num_classes: Number of ordinal classes (must be >= 2)
+        threshold_init: Threshold initialization ('ascending', 'uniform')
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for ordinal regression
+    """
+    if num_classes < 2:
+        raise ValueError(f"Ordinal regression requires num_classes >= 2, got {num_classes}")
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_classes,
+        activation="sigmoid",
+        dropout_rate=dropout_rate,
+        head_type="ordinal",
+        custom_params={"threshold_init": threshold_init}
+    )
+
+
+def create_ssd_detection_head(name: str, num_classes: int = 1,
+                            num_anchors: int = 3,
+                            anchor_scales: Optional[List[float]] = None,
+                            anchor_ratios: Optional[List[float]] = None,
+                            dropout_rate: float = 0.1) -> HeadConfiguration:
+    """Create an SSD detection head configuration.
+    
+    Args:
+        name: Head name
+        num_classes: Number of classes (1 for face detection, >1 for multi-class)
+        num_anchors: Number of anchor boxes per spatial location
+        anchor_scales: Scale factors for anchors
+        anchor_ratios: Aspect ratios for anchors
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for SSD detection
+    """
+    anchor_scales = anchor_scales or [0.1, 0.2, 0.37]
+    anchor_ratios = anchor_ratios or [0.5, 1.0, 2.0]
+    
+    custom_params = {
+        "num_anchors": num_anchors,
+        "anchor_scales": anchor_scales,
+        "anchor_ratios": anchor_ratios,
+        "box_loss_weight": 1.0,
+        "conf_threshold": 0.5
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_classes,
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="ssd_detection",
+        custom_params=custom_params
+    )
+
+
+def create_yolo_detection_head(name: str, num_classes: int,
+                             num_boxes: int = 3,
+                             coord_scale: float = 1.0,
+                             dropout_rate: float = 0.1) -> HeadConfiguration:
+    """Create a YOLO detection head configuration.
+    
+    Args:
+        name: Head name
+        num_classes: Number of object classes
+        num_boxes: Number of bounding boxes per grid cell
+        coord_scale: Scaling factor for coordinates
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for YOLO detection
+    """
+    custom_params = {
+        "num_boxes": num_boxes,
+        "coord_scale": coord_scale
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_classes,
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="yolo_detection",
+        custom_params=custom_params
+    )
+
+
+def create_segmentation_head(name: str, num_classes: int,
+                           upsample_factor: int = 8,
+                           intermediate_channels: Optional[List[int]] = None,
+                           dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create a semantic segmentation head configuration.
+    
+    Args:
+        name: Head name
+        num_classes: Number of semantic classes
+        upsample_factor: Factor to upsample feature maps to input resolution
+        intermediate_channels: Channels for progressive upsampling layers
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for semantic segmentation
+    """
+    intermediate_channels = intermediate_channels or [256, 128]
+    
+    custom_params = {
+        "upsample_factor": upsample_factor,
+        "intermediate_channels": intermediate_channels,
+        "use_skip_connections": False
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_classes,
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="segmentation",
+        custom_params=custom_params
+    )
+
+
+def create_keypoint_detection_head(name: str, num_keypoints: int,
+                                 upsample_factor: int = 4,
+                                 heatmap_sigma: float = 1.0,
+                                 intermediate_dim: int = 256,
+                                 dropout_rate: float = 0.1) -> HeadConfiguration:
+    """Create a keypoint detection head configuration.
+    
+    Args:
+        name: Head name
+        num_keypoints: Number of keypoints to detect
+        upsample_factor: Upsampling factor for heatmaps
+        heatmap_sigma: Gaussian sigma for ground truth heatmaps
+        intermediate_dim: Intermediate feature dimension
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for keypoint detection
+    """
+    custom_params = {
+        "upsample_factor": upsample_factor,
+        "heatmap_sigma": heatmap_sigma,
+        "intermediate_dim": intermediate_dim
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=num_keypoints,
+        activation="sigmoid",
+        dropout_rate=dropout_rate,
+        head_type="keypoint_detection",
+        custom_params=custom_params
+    )
+
+
+def create_text_detection_head(name: str,
+                             detect_orientation: bool = True,
+                             min_text_size: int = 8,
+                             link_threshold: float = 0.4,
+                             text_threshold: float = 0.7,
+                             dropout_rate: float = 0.1) -> HeadConfiguration:
+    """Create a text detection head configuration.
+    
+    Args:
+        name: Head name
+        detect_orientation: Whether to predict text orientation angles
+        min_text_size: Minimum text region size in pixels
+        link_threshold: Threshold for linking text segments
+        text_threshold: Threshold for text confidence
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for text detection
+    """
+    custom_params = {
+        "detect_orientation": detect_orientation,
+        "min_text_size": min_text_size,
+        "link_threshold": link_threshold,
+        "text_threshold": text_threshold
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=1,  # Text/no-text binary classification
+        activation="sigmoid",
+        dropout_rate=dropout_rate,
+        head_type="text_detection",
+        custom_params=custom_params
+    )
+
+
+def create_text_recognition_head(name: str, vocab_size: int,
+                               max_text_length: int = 32,
+                               use_attention: bool = False,
+                               rnn_units: int = 256,
+                               num_rnn_layers: int = 2,
+                               dropout_rate: float = 0.2) -> HeadConfiguration:
+    """Create a text recognition head configuration.
+    
+    Args:
+        name: Head name
+        vocab_size: Size of character vocabulary (including blank for CTC)
+        max_text_length: Maximum text sequence length
+        use_attention: Whether to use attention mechanism
+        rnn_units: RNN hidden units
+        num_rnn_layers: Number of RNN layers
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for text recognition
+    """
+    custom_params = {
+        "max_text_length": max_text_length,
+        "use_attention": use_attention,
+        "rnn_units": rnn_units,
+        "num_rnn_layers": num_rnn_layers
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=vocab_size,
+        activation="linear",  # CTC compatible
+        dropout_rate=dropout_rate,
+        head_type="text_recognition",
+        custom_params=custom_params
+    )
+
+
+def create_scene_text_head(name: str, char_vocab_size: int,
+                         max_detections: int = 100,
+                         max_chars_per_text: int = 25,
+                         detection_threshold: float = 0.5,
+                         dropout_rate: float = 0.1) -> HeadConfiguration:
+    """Create an end-to-end scene text reading head configuration.
+    
+    Args:
+        name: Head name
+        char_vocab_size: Character vocabulary size
+        max_detections: Maximum number of text instances
+        max_chars_per_text: Maximum characters per text instance
+        detection_threshold: Text detection confidence threshold
+        dropout_rate: Dropout rate for regularization
+        
+    Returns:
+        HeadConfiguration for scene text reading
+    """
+    custom_params = {
+        "max_detections": max_detections,
+        "max_chars_per_text": max_chars_per_text,
+        "detection_threshold": detection_threshold,
+        "char_vocab_size": char_vocab_size
+    }
+    
+    return HeadConfiguration(
+        name=name,
+        num_classes=char_vocab_size,
+        activation="linear",
+        dropout_rate=dropout_rate,
+        head_type="scene_text",
+        custom_params=custom_params
+    )

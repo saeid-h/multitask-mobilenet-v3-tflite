@@ -144,3 +144,6 @@ coverage.xml
 .prof
 *ARTICLE*
 
+# Medium articles (draft content)
+docs/medium/
+
